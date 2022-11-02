@@ -13,9 +13,15 @@
   command: k0s install controller --config {{ k0s_config_dir }}/k0s.yaml --token-file {{ k0s_config_dir }}/controller-token {{ extra_args | default(omit) }}
   changed_when: install_controller_cmd | length > 0
 
-- name: Setup custom environment variables for systemd unit
-  include_role:
-    name: gudron.ansible_k0s_env_setup
+- name: Ensure k0scontroller service dir exists.
+  file:
+    path: /etc/systemd/system/k0scontroller.service.d
+    state: directory
+
+- name: Ensure systemd drop-in unit for custom Env exists
+  template:
+    src: env.conf.j2
+    dest: /etc/systemd/system/k0scontroller.service.d/env.conf
 
 - name: "Enable and check k0s service"
   become: true
